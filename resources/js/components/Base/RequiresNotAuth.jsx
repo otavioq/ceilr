@@ -1,29 +1,31 @@
 import request from "@/services/request";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import Loader from "@/components/Loader";
 
-export default function RequiresAuth({Page}) {
+export default function RequiresNotAuth({Page}) {
 
-    const [logged, setLogged] = useState(false)
+    const [logged, setLogged] = useState(true)
 
     const location = useLocation()
     const dispatch = useDispatch()
+    const navigate = useNavigate()
 
     const verify = async () => {
-
         const resp = await request({
             method: 'GET',
-            url: '/me'
+            url: '/me',
+            showError: false
         })
 
         if (!resp) {
+            setLogged(false);
             return;
         }
 
-        setLogged(true);
         dispatch({user: resp, type: 'user'});
+        navigate('/', {replace: true})
     }
 
     useEffect(() => {
@@ -31,6 +33,6 @@ export default function RequiresAuth({Page}) {
     }, [location.pathname])
 
     return (
-        logged ? <Page/> : <Loader/>
+        !logged ? <Page/> : <Loader/>
     )
 }

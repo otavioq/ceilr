@@ -7,6 +7,7 @@ import Home from "@/pages/Home";
 import Properties from "@/pages/Properties";
 import Register from "@/pages/Auth/Register";
 import Login from "@/pages/Auth/Login";
+import RequiresNotAuth from "@/components/Base/RequiresNotAuth";
 
 const router = createBrowserRouter([
     {
@@ -29,11 +30,11 @@ const router = createBrowserRouter([
         children: [
             {
                 path: "register",
-                element: <Register/>
+                element: <RequiresNotAuth Page={Register}/>
             },
             {
                 path: "login",
-                element: <Login/>
+                element: <RequiresNotAuth Page={Login}/>
             },
         ]
     }
