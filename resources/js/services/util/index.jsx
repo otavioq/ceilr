@@ -38,7 +38,8 @@ const register = async (data) => {
     const resp = await request({
         method: 'POST',
         url: '/auth/register',
-        data: data
+        data: data,
+        auth: false
     });
 
     if (!resp) {
@@ -70,11 +71,16 @@ const formatCurrency = (val = '0') => {
     return parseFloat(val).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
 }
 
+const unmaskCurrency = (val) => {
+    return parseInt(val.replace(/[^0-9]/i, '')) / 100
+}
+
 const alert = async (opt) => {
     const options = {
         title: 'Tem certeza?',
         icon: 'warning',
         confirmButtonText: 'Sim',
+        confirmButtonColor: '#198754',
         cancelButtonText: 'Cancelar',
         ...opt
     }
@@ -98,5 +104,6 @@ export {
     setFullLoader,
     formatDate,
     formatCurrency,
+    unmaskCurrency,
     alert
 };

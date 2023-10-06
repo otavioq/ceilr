@@ -1,0 +1,26 @@
+diff --git a/node_modules/react-bs-datatable/lib/cjs/components/Pagination.js b/node_modules/react-bs-datatable/lib/cjs/components/Pagination.js
+index 3069f86..c9e1b48 100644
+--- a/node_modules/react-bs-datatable/lib/cjs/components/Pagination.js
++++ b/node_modules/react-bs-datatable/lib/cjs/components/Pagination.js
+@@ -46,7 +46,7 @@ function Pagination({ labels, classes, paginationRange = DEFAULT_PAGINATION_RANG
+     const onPaginationChange = (controlledProps === null || controlledProps === void 0 ? void 0 : controlledProps.onPaginationChange) || onPaginationChangeContext;
+     // Hide pagination if pagination is meant to not always be shown and the max page is 1,
+     // or if rows per page is -1.
+-    const hidePagination = !alwaysShowPagination && maxPage === 1;
++    const hidePagination = !alwaysShowPagination && maxPage <= 1;
+     const buttons = [];
+     const firstLabel = (labels === null || labels === void 0 ? void 0 : labels.firstPage) || 'First';
+     const prevLabel = (labels === null || labels === void 0 ? void 0 : labels.prevPage) || 'Prev';
+diff --git a/node_modules/react-bs-datatable/lib/esm/components/Pagination.js b/node_modules/react-bs-datatable/lib/esm/components/Pagination.js
+index a963e92..0e2532d 100644
+--- a/node_modules/react-bs-datatable/lib/esm/components/Pagination.js
++++ b/node_modules/react-bs-datatable/lib/esm/components/Pagination.js
+@@ -24,7 +24,7 @@ export function Pagination({ labels, classes, paginationRange = DEFAULT_PAGINATI
+     const onPaginationChange = (controlledProps === null || controlledProps === void 0 ? void 0 : controlledProps.onPaginationChange) || onPaginationChangeContext;
+     // Hide pagination if pagination is meant to not always be shown and the max page is 1,
+     // or if rows per page is -1.
+-    const hidePagination = !alwaysShowPagination && maxPage === 1;
++    const hidePagination = !alwaysShowPagination && maxPage <= 1;
+     const buttons = [];
+     const firstLabel = (labels === null || labels === void 0 ? void 0 : labels.firstPage) || 'First';
+     const prevLabel = (labels === null || labels === void 0 ? void 0 : labels.prevPage) || 'Prev';

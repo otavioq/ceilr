@@ -5,9 +5,17 @@ namespace App\Services;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
-class AuthService extends AbstractService {
-
-    public static function passwordValidation($data)
+/**
+ * Encapsula métodos relacionados à autenticação de usuário
+ */
+class AuthService extends AbstractService
+{
+    /**
+     * Método para validar os campos de senha e confirmação
+     * 
+     * @throws \Illuminate\Validation\ValidationException;
+     */
+    public static function passwordValidation(array $data): string
     {
         $error = '';
 

@@ -8,6 +8,7 @@
     "devDependencies": {
         "axios": "^1.1.2",
         "laravel-vite-plugin": "^0.8.0",
+        "patch-package": "^8.0.0",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
         "vite": "^4.0.0"
@@ -24,6 +25,8 @@
         "luxon": "^3.4.3",
         "react-bootstrap": "^2.9.0",
         "react-bs-datatable": "^3.12.0",
+        "react-currency-masked-input": "^2.5.0",
+        "react-input-mask": "^2.0.4",
         "react-redux": "^8.1.3",
         "react-router-dom": "^6.16.0",
         "sweetalert2": "^11.7.31"

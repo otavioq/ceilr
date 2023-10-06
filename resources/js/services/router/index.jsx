@@ -8,6 +8,7 @@ import Properties from "@/pages/Properties";
 import Register from "@/pages/Auth/Register";
 import Login from "@/pages/Auth/Login";
 import RequiresNotAuth from "@/components/Base/RequiresNotAuth";
+import NotFound from "@/pages/NotFound";
 
 const router = createBrowserRouter([
     {
@@ -16,12 +17,8 @@ const router = createBrowserRouter([
         children: [
             {
                 path: "/",
-                element: <RequiresAuth Page={Home}/>
-            },
-            {
-                path: "properties",
                 element: <RequiresAuth Page={Properties}/>
-            },
+            }
         ]
     },
     {
@@ -37,6 +34,10 @@ const router = createBrowserRouter([
                 element: <RequiresNotAuth Page={Login}/>
             },
         ]
+    },
+    {
+        path: '*',
+        element: <NotFound/>
     }
 ]);
 

@@ -2,7 +2,7 @@ import request from "@/services/request";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useLocation } from "react-router-dom";
-import Loader from "@/components/Loader";
+import { setFullLoader } from "@/services/util";
 
 export default function RequiresAuth({Page}) {
 
@@ -12,11 +12,12 @@ export default function RequiresAuth({Page}) {
     const dispatch = useDispatch()
 
     const verify = async () => {
-
+        setFullLoader(true)
         const resp = await request({
             method: 'GET',
             url: '/me'
         })
+        setFullLoader(false)
 
         if (!resp) {
             return;
@@ -30,7 +31,5 @@ export default function RequiresAuth({Page}) {
         verify()
     }, [location.pathname])
 
-    return (
-        logged ? <Page/> : <Loader/>
-    )
+    return logged ? <Page/> : null
 }

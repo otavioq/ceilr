@@ -2,7 +2,7 @@ import request from "@/services/request";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
-import Loader from "@/components/Loader";
+import { setFullLoader } from "@/services/util";
 
 export default function RequiresNotAuth({Page}) {
 
@@ -13,11 +13,14 @@ export default function RequiresNotAuth({Page}) {
     const navigate = useNavigate()
 
     const verify = async () => {
+        setFullLoader(true)
         const resp = await request({
             method: 'GET',
             url: '/me',
-            showError: false
+            showError: false,
+            redirect: false
         })
+        setFullLoader(false)
 
         if (!resp) {
             setLogged(false);
@@ -32,7 +35,5 @@ export default function RequiresNotAuth({Page}) {
         verify()
     }, [location.pathname])
 
-    return (
-        !logged ? <Page/> : <Loader/>
-    )
+    return !logged ? <Page/> : null
 }

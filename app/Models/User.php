@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 
+/**
+ * Modelo de registro de usuário
+ */
 class User extends Authenticatable implements JWTSubject
 {
     use HasFactory, Notifiable;
@@ -15,6 +17,9 @@ class User extends Authenticatable implements JWTSubject
     protected $table = 'users';
     protected $primaryKey = 'id';
 
+    /**
+     * Array contendo as colunas preenchíveis
+     */
     protected $fillable = [
         'name',
         'email',
@@ -39,6 +44,9 @@ class User extends Authenticatable implements JWTSubject
         return [];
     }
 
+    /**
+     * Relação entre usuário e imóveis
+     */
     public function properties()
     {
         return $this->hasMany(Property::class);

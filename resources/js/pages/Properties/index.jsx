@@ -3,9 +3,10 @@ import { Card, Col, Dropdown, Form, Modal, Row, Table } from "react-bootstrap";
 import request from "@/services/request";
 import Btn from "@/components/Btn";
 import FormInput from "@/components/FormInput";
-import { alert, formatCurrency, setFullLoader } from "@/services/util";
+import { alert, formatCurrency, setFullLoader, unmaskCurrency } from "@/services/util";
 import {
     DatatableWrapper,
+    EmptyTablePlaceholder,
     Filter,
     Pagination,
     PaginationOptions,
@@ -19,7 +20,7 @@ export default function Properties() {
     const ac = new AbortController
     const propertyData = {
         type: 'house',
-        price: '',
+        price: 0,
         state: '',
         city: '',
         district: '',
@@ -30,6 +31,7 @@ export default function Properties() {
     const [properties, setProperties] = useState([])
     const [modalOpen, setModalOpen] = useState(false)
     const [types, setTypes] = useState({})
+    const [paging, setPaging] = useState({})
     const [property, setProperty] = useState(propertyData)
 
     useEffect(() => {
@@ -94,7 +96,7 @@ export default function Properties() {
 
         return (
             <Dropdown>
-                <Dropdown.Toggle size="sm" />
+                <Dropdown.Toggle className="py-1" />
                 <Dropdown.Menu>
                     {actions.filter(btn => btn.shown !== false).map((btn, i) => (
                         <Dropdown.Item
@@ -109,11 +111,37 @@ export default function Properties() {
     }
 
     const headers = useMemo(() => ([
-        { title: 'Endereço', prop: 'address', isFilterable: true, isSortable: true, cellProps: { style: {width: '65%'} } },
-        { title: 'Tipo', prop: 'type_text', isFilterable: true, isSortable: true },
-        { title: 'Preço', prop: 'price', cell: ({price}) => `R$ ${formatCurrency(price)}`, isFilterable: true, isSortable: true },
-        { title: 'Status', prop: 'status_text', isFilterable: true, isSortable: true },
-        { title: '', prop: 'actions', cell: renderActions },
+        {
+            title: 'Endereço',
+            prop: 'address',
+            isFilterable: true,
+            isSortable: true,
+            cellProps: { style: {width: '65%'} }
+        },
+        {
+            title: 'Tipo',
+            prop: 'type_text',
+            isFilterable: true,
+            isSortable: true
+        },
+        {
+            title: 'Preço',
+            prop: 'price',
+            cell: ({price}) => `R$ ${formatCurrency(price)}`,
+            isFilterable: true,
+            isSortable: true
+        },
+        {
+            title: 'Status',
+            prop: 'status_text',
+            isFilterable: true,
+            isSortable: true
+        },
+        {
+            title: '',
+            prop: 'actions',
+            cell: renderActions
+        },
     ]), []);
 
     const listProperties = async () => {
@@ -145,32 +173,21 @@ export default function Properties() {
             cancelButtonText: 'Não',
             onConfirm: async () => {
                 setFullLoader(true);
-        
+
                 const resp = await request({
                     method: 'PUT',
                     url: `/properties/status/${id}`,
                     data: {status}
                 })
-        
+
                 if (!resp) {
                     return setFullLoader(false);
                 }
-        
+
                 await getInfo();
                 setFullLoader(false);
             }
         })
-    }
-
-    const onHide = () => {
-        setModalOpen(false)
-        setProperty(propertyData)
-    }
-
-    const onChange = ({target}, field) => {
-        const obj = {...property};
-        obj[field] = target.value;
-        setProperty(obj);
     }
 
     const save = async (e) => {
@@ -189,12 +206,24 @@ export default function Properties() {
 
         alert({
             icon: 'success',
+            confirmButtonText: 'Ok',
             title: `Registro ${property.id ? 'editado' : 'criado'} com sucesso`
         })
 
         await getInfo();
         onHide();
         setFullLoader(false);
+    }
+
+    const onHide = () => {
+        setModalOpen(false)
+        setProperty(propertyData)
+    }
+
+    const onChange = ({target}, field) => {
+        const obj = {...property};
+        obj[field] = target.value;
+        setProperty(obj);
     }
 
     const RenderTypes = () => {
@@ -248,19 +277,21 @@ export default function Properties() {
                                 placeholder="Buscar"
                             />
                         </div>
-                        
 
-                        <Table striped hover size="sm">
+
+                        <Table striped hover size="sm" className="align-middle">
                             <TableHeader />
-                            <TableBody/>
+                            <TableBody labels={{noResults: 'Nenhum registro encontrado'}}/>
                         </Table>
 
                         <div className="d-flex align-items-end justify-content-end gap-3">
                             <PaginationOptions
+                                alwaysShowPagination={false}
                                 labels={{beforeSelect: 'Linhas por página'}}
                                 classes={{formControl: "form-select-sm"}}
                             />
                             <Pagination
+                                alwaysShowPagination={false}
                                 labels={{prevPage: '<', firstPage: 'Primeira', nextPage: '>', lastPage: 'Última'}}
                                 classes={{button: "btn-sm"}}
                             />
@@ -292,6 +323,7 @@ export default function Properties() {
                                     label="Preço"
                                     value={property.price}
                                     onChange={e => onChange(e, 'price')}
+                                    currency
                                 />
                             </Col>
                             <Col md={'6'}>

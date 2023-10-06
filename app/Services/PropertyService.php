@@ -5,18 +5,28 @@ namespace App\Services;
 use App\Models\Property;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
+/**
+ * Classe para manipulação de registros de imóvel
+ */
 class PropertyService extends AbstractService
 {
+    /**
+     * Recupera os tipos de imóvel
+     */
     public function types(): array
     {
         return Property::TYPES;
     }
 
+    /**
+     * Lista todos os registros
+     * 
+     * @param array $filters Um array com filtros para a listagem* 
+     * @throws \Illuminate\Validation\ValidationException;
+     */
     public function list(array $filters = []): Collection
     {
         $this->rules = [
@@ -46,6 +56,12 @@ class PropertyService extends AbstractService
         return $properties->where('status', '!=', Property::DELETED)->get();
     }
 
+    /**
+     * Cria um novo registro
+     * 
+     * @param array $data Um array com os dados a serem inseridos no regitro
+     * @throws \Illuminate\Validation\ValidationException;
+     */
     public function create(array $data): Property
     {
         $this->rules = [
@@ -64,6 +80,13 @@ class PropertyService extends AbstractService
         return $user->properties()->create($validData);
     }
 
+    /**
+     * Altera um registro
+     * 
+     * @param array $data Um array com os dados a serem alterados
+     * @param int $id Identificador do registro a ser alterado
+     * @throws \Illuminate\Validation\ValidationException
+     */
     public function update(array $data, int $id): Property
     {
         $property = $this->find($id);
@@ -84,6 +107,13 @@ class PropertyService extends AbstractService
         return $property;
     }
 
+    /**
+     * Altera o status de um imóvel
+     * 
+     * @param array $data Um array contendo o novo status
+     * @param int $id Identificador do registro a ser alterado
+     * @throws \Illuminate\Validation\ValidationException
+     */
     public function updateStatus(array $data, int $id): Property
     {
         $property = $this->find($id);
@@ -98,6 +128,11 @@ class PropertyService extends AbstractService
         return $property;
     }
 
+    /**
+     * Exclui um imóvel
+     * 
+     * @param int $id Identificador do registro a ser excluído
+     */
     public function delete(int $id): bool
     {
         $property = $this->find($id);
@@ -105,6 +140,12 @@ class PropertyService extends AbstractService
         return $property->update(['status' => Property::DELETED]);
     }
 
+    /**
+     * Busca um registro pelo seu identificador
+     * 
+     * @param int $id Identificador do reistro a ser buscado
+     * @throws \Symfony\Component\HttpKernel\Exception\HttpException
+     */
     public function find(int $id): Property
     {
         $user = user();

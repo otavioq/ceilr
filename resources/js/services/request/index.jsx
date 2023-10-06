@@ -9,7 +9,7 @@ function getError(e) {
 
     if (typeof e === 'object' && e.length) {
         const assembleMessages = (arr) => {
-            return arr.map(i => `${arr.length > 1 ? `>` : ''} ${typeof i === 'string' ? i : i.message}`)
+            return arr.map(i => `${arr.length > 1 ? `-` : ''} ${typeof i === 'string' ? i : i.message}`)
         }
 
         return e.map(i => {
@@ -24,9 +24,9 @@ function getError(e) {
         let str = ''
         for( const key in e){
             if ( typeof e[key] == 'string'){
-                str += `> ${e[key]}<br>`
-            } else if ( typeof e[key] == 'object' ){
-                str += `> ${e[key][0]}<br>`
+                str += `- ${e[key]}<br>`
+            } else if ( typeof e[key] == 'object' && typeof e[key][0] == 'string' ){
+                str += `- ${e[key][0]}<br>`
             }
         }
         return str
@@ -38,6 +38,7 @@ function getError(e) {
 export default async function request(config) {
 
     const opt = {
+        redirect: true,
         showError: true,
         auth: true,
         throwError: false,
@@ -50,7 +51,7 @@ export default async function request(config) {
         if (opt?.auth && !!token?.length) {
             opt.headers = { ...opt.headers, Authorization: `Bearer ${token}` }
         } else if (opt?.auth) {
-            router.navigate('/auth/login')
+            opt.redirect && router.navigate('/auth/login')
             throw 'Não autorizado';
         }
 
@@ -68,13 +69,14 @@ export default async function request(config) {
 
         return resp.data?.data;
     } catch (e) {
+        console.log(e);
         opt.showError && Swal.fire({
             icon: 'error',
             title: 'Erro',
             html: getError(e?.response?.data?.messages || e )
         });
 
-        if ([401, 403].includes(e?.status || e?.response?.status)) {
+        if (opt.redirect && [401, 403].includes(e?.status || e?.response?.status)) {
             router.navigate('/auth/login')
         }
 

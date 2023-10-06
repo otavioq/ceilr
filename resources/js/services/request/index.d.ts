@@ -6,6 +6,7 @@ declare type Config = {
     showError?: boolean,
     throwError?: boolean,
     auth?: boolean,
+    redirect?: boolean,
     signal?: typeof ac.signal
 }
 
