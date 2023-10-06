@@ -19,7 +19,7 @@ export default function Navbar() {
     return (
         <BsNavbar className="bg-dark" data-bs-theme="dark">
             <Container>
-                <BsNavbar.Brand onClick={() => navigate('/')} style={{cursor: 'pointer', userSelect: 'none'}}>HouseGer</BsNavbar.Brand>
+                <BsNavbar.Brand onClick={() => navigate('/')} style={{cursor: 'pointer', userSelect: 'none'}}>Ceilr</BsNavbar.Brand>
                 <BsNavbar.Toggle aria-controls="context-dropdown" />
                 <BsNavbar.Collapse id="context-dropdown">
                     <Nav className="ms-auto">

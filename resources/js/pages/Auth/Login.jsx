@@ -29,7 +29,7 @@ export default function Login() {
             <Col md={5}>
                 <Card>
                     <Card.Body>
-                        <h3 className="card-title text-center">HouseGer</h3>
+                        <h3 className="card-title text-center">Ceilr</h3>
                         <Form id="form-login" className="d-flex flex-column gap-2" onSubmit={login}>
                             <Row className="row-gap-3">
                                 <Col md={12}>
