@@ -97,7 +97,7 @@ class Property extends Model
 
         $str = "";
         foreach ($fields as $field) {
-            if (empty($$field['value'])) {
+            if (empty($field['value'])) {
                 continue;
             }
 
