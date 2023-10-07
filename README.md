@@ -1,75 +1,83 @@
 # Ceilr
 ## Projeto desafio CRUD Arbo
 
-### Aplicação de gerenciamento de imóveis construída utilizando Laravel + React
+### Aplicação de gerenciamento de imóveis construída utilizando Laravel, React e MySQL
 
 ## Pré-requisitos
-- [PHP 8^](https://www.php.net/)
-- [Composer](https://getcomposer.org/)
 - [Docker](https://www.docker.com/get-started/) e [Docker Compose](https://docs.docker.com/compose/install/)
 - Node 18^ [(nvm)](https://github.com/nvm-sh/nvm#installing-and-updating)
 ## Setup
 
 Clonar o repositório.
 ```sh
-$ git clone git@github.com:otavioq/ceilr.git && cd ceilr
-```
-
-Instalar dependências do Laravel.
-```sh
-$ composer update && composer install
+git clone git@github.com:otavioq/ceilr.git && cd ceilr
 ```
 
 Instalar os pacotes Node.
 ```sh
-$ npm i
+npm i
 ```
 
 Configurar variáveis de ambiente e conexão com o DB.
 ```sh
-$ cp .env.example .env
+cp .env.example .env
 ```
 
 ```
 # .env
 
 DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
+DB_HOST=172.17.0.1
 DB_PORT=3306
 DB_DATABASE=ceilr
 DB_USERNAME=root
 DB_PASSWORD=root
 ```
 
-Executar o Laravel Sail para inicializar o sistema. Este passo pode demorar alguns minutos na primeira vez.
+Executar o Docker Compose para inicializar o sistema.
 ```sh
-$ ./vendor/bin/sail up
-```
-ou
-```sh
-$ ./vendor/bin/sail start
+docker compose up
 ```
 
-Executar os comandos de configuração do Laravel, migrations e JWT.
+Executar os comandos de configuração do Laravel, migrations e JWT dentro da VM do Docker.
 ```sh
-$ php artisan key:generate
-$ php artisan jwt:secret
-$ php artisan migrate
+docker compose exec ceilr bash -c "
+    composer update && composer install
+    php artisan key:generate
+    php artisan jwt:secret
+    php artisan migrate
+    exit
+"
+```
+
+Caso queira acessar a VM do Docker
+```sh
+docker compose exec ceilr bash
 ```
 
 Inicializar o Vite para compilação do front-end
 ```sh
-$ npm run dev
+npm run dev
 ```
 
-Agora basta acessar o [localhost](http://localhost)
+Agora basta acessar o [localhost](http://localhost).
+
+As portas podem ser configuradas no arquivo `.env` através das variáveis `APP_FORWARD_PORT` e `DB_FORWARD_PORT`.
+
+Para executar os testes de implementação.
+```sh
+docker compose exec ceilr bash -c "php artisan test"
+```
 
 # O Ceilr
 ## Ceilr, abreviado de _ceiler_, é _"aquele que faz o teto, constrói a cobertura da edificação"_.
 
-O sistema consiste em um Back-end feito com PHP, utilizando o framework Laravel, dividido no modelo MVC
-e utiliza uma camada extra de abstração com os _srvices_, que encapsulam toda a lógica de manipulação dos registros,
-tirando a responsabilidade dos _controllers_, os tornando mais manuteníveis.
+O sistema consiste em um _back-end_ feito com _PHP_, utilizando o framework _Laravel_, dividido no modelo _MVC_ e utiliza uma camada extra de abstração com os _services_,<br>
+que encapsulam toda a lógica de manipulação dos registros, tirando a responsabilidade dos _controllers_, os tornando mais manuteníveis.<br>
+Com a utilização de _observers_, o controle da manipulação dos registros também se torna mais segura durante o desenvolvimento e manutenção do código.<br>
+Utiliza-se, também, os _resources_, que melhoram a maneira com que os dados são retornados pelas _APIs_, podendo ser utilizados para complementar as informações de acordo com a necessidade.
 
-Com a utilização de _observers_, o controle da manipulação dos registros também se torna mais segura durante o desonvolvimento e manutenção do código.
-Utiliza-se, também, os _resources_, que implementam 
+O _front-end_, construído utilizando o _React_, também possui sua estrutura bem dividida, contando com diretórios individuais para cada página e componente,
+fazendo uso da biblioteca _React Bootstrap_ para estilização e customização dos mesmos.<br>
+Para armazenar o estado da aplicação, é utilizado o _Redux_, que ajuda na verificação da sessão do usuário e permite recuperar as informações deste a qualquer momento dentro do código no _front-end_.<br>
+Todas as requisições são feitas utilizando o _Axios_, onde o site faz as chamadas para o _back-end_ através de _APIs_, passando um token de autenticação para a verificação do usuário logado.

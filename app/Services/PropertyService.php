@@ -83,7 +83,9 @@ class PropertyService extends AbstractService
             }
         }
 
-        return $properties->where('status', '!=', Property::DELETED)->get();
+        return $properties->where('status', '!=', Property::DELETED)
+            ->orderBy('id', 'desc')
+            ->get();
     }
 
     /**

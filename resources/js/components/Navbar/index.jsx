@@ -19,7 +19,7 @@ export default function Navbar() {
     return (
         <BsNavbar className="bg-dark" data-bs-theme="dark">
             <Container>
-                <BsNavbar.Brand className="h1 my-0" onClick={() => navigate('/')} style={{cursor: 'pointer', userSelect: 'none'}}>Ceilr</BsNavbar.Brand>
+                <h3 className="text-white my-0 me-3" onClick={() => navigate('/')} style={{cursor: 'pointer', userSelect: 'none'}}>Ceilr</h3>
                 <BsNavbar.Toggle aria-controls="context-dropdown" />
                 <BsNavbar.Collapse id="context-dropdown">
                     <Nav>

@@ -1,24 +1,16 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Card, Col, Dropdown, Form, Modal, Row, Table } from "react-bootstrap";
+import { Card, Col, Dropdown, Row, Table } from "react-bootstrap";
+import { useSearchParams } from "react-router-dom";
+import { DatatableWrapper, Filter, Pagination, PaginationOptions, TableBody, TableHeader } from 'react-bs-datatable';
+import { alert, formatCurrency, setFullLoader } from "@/services/util";
 import request from "@/services/request";
 import Btn from "@/components/Btn";
-import FormInput from "@/components/FormInput";
-import { alert, formatCurrency, setFullLoader } from "@/services/util";
-import {
-    DatatableWrapper,
-    Filter,
-    Pagination,
-    PaginationOptions,
-    TableBody,
-    TableHeader
-} from 'react-bs-datatable';
 import Select from "@/components/Select";
-import { useSearchParams } from "react-router-dom";
+import PropertyModal from "./PropertyModal";
 
 export default function Properties() {
 
     const ac = new AbortController
-    const ac2 = new AbortController
     const propertyData = {
         type: 'house',
         price: 0,
@@ -32,7 +24,7 @@ export default function Properties() {
     const [properties, setProperties] = useState([])
     const [modalOpen, setModalOpen] = useState(false)
     const [types, setTypes] = useState({})
-    const [statuses, setStatuses] = useState({})
+    const [statuses, setStatuses] = useState({b:2})
     const [property, setProperty] = useState(propertyData)
 
     const [searchParams, setSearchParams] = useSearchParams()
@@ -43,7 +35,6 @@ export default function Properties() {
 
         return () => {
             ac.abort();
-            ac2.abort();
         }
     }, [])
 
@@ -59,11 +50,18 @@ export default function Properties() {
         ]);
     }
 
+    const getAllInfo = async () => {
+        await Promise.all([
+            getInfo(),
+            listProperties()
+        ]);
+    }
+
     const getTypes = async () => {
         const resp = await request({
             method: 'GET',
             url: '/property-types',
-            signal: ac2.signal
+            signal: ac.signal
         });
 
         setTypes(resp || {});
@@ -73,15 +71,16 @@ export default function Properties() {
         const resp = await request({
             method: 'GET',
             url: '/property-statuses',
-            signal: ac2.signal
+            signal: ac.signal
         });
 
-        setStatuses(resp || {});
+        setStatuses(resp || {a:1});
     }
 
     const listProperties = async (filters = {}) => {
         const status = searchParams.get('status') || ''
-        if (status.length && statuses[status]) {
+        
+        if (status.length) {
             filters.status = status
         }
 
@@ -108,22 +107,22 @@ export default function Properties() {
             },
             {
                 label: 'Imóvel disponível',
-                onClick: () => updateStatus(item.id, 'available'),
+                onClick: () => promptUpdate(item.id, 'available'),
                 shown: item.status != 'available'
             },
             {
                 label: 'Imóvel locado',
-                onClick: () => updateStatus(item.id, 'rented'),
+                onClick: () => promptUpdate(item.id, 'rented'),
                 shown: item.status == 'available'
             },
             {
                 label: 'Imóvel vendido',
-                onClick: () => updateStatus(item.id, 'sold'),
+                onClick: () => promptUpdate(item.id, 'sold'),
                 shown: item.status == 'available'
             },
             {
                 label: 'Deletar imóvel',
-                onClick: () => updateStatus(item.id, 'deleted'),
+                onClick: () => promptUpdate(item.id, 'deleted'),
                 shown: item.status == 'available',
                 variant: 'danger'
             },
@@ -145,7 +144,7 @@ export default function Properties() {
         );
     }
 
-    const headers = useMemo(() => ([
+    const headers = [
         {
             title: 'Endereço',
             prop: 'address',
@@ -177,9 +176,9 @@ export default function Properties() {
             prop: 'actions',
             cell: renderActions
         },
-    ]), []);
+    ];
 
-    const updateStatus = async (id, status) => {
+    const promptUpdate = (id, status) => {
         const prompts = {
             'available': 'Marcar este imóvel como disponível?',
             'rented': 'Marcar este imóvel como alugado?',
@@ -193,27 +192,29 @@ export default function Properties() {
             html: `<h4>${prompts[status]}</h4>`,
             showCancelButton: true,
             cancelButtonText: 'Não',
-            onConfirm: async () => {
-                setFullLoader(true);
-
-                const resp = await request({
-                    method: 'PUT',
-                    url: `/properties/status/${id}`,
-                    data: {status}
-                })
-
-                if (!resp) {
-                    return setFullLoader(false);
-                }
-
-                await Promise.all([getInfo(), listProperties()]);
-                setFullLoader(false);
-            }
+            onConfirm: () => updateStatus(id, status)
         })
     }
 
-    const save = async (e) => {
-        e.preventDefault()
+    const updateStatus = async (id, status) => {
+        setFullLoader(true);
+
+        const resp = await request({
+            method: 'PUT',
+            url: `/properties/status/${id}`,
+            data: {status}
+        })
+
+        if (!resp) {
+            return setFullLoader(false);
+        }
+
+        getAllInfo().then(() => {
+            setFullLoader(false);
+        })
+    }
+
+    const save = async () => {
         setFullLoader(true)
 
         const resp = await request({
@@ -232,9 +233,10 @@ export default function Properties() {
             title: `Registro ${property.id ? 'editado' : 'criado'} com sucesso`
         })
 
-        await Promise.all([getInfo(), listProperties()]);
-        onHide();
-        setFullLoader(false);
+        getAllInfo().then(() => {
+            onHide();
+            setFullLoader(false);
+        })
     }
 
     const onHide = () => {
@@ -242,22 +244,10 @@ export default function Properties() {
         setProperty(propertyData)
     }
 
-    const onChange = ({target}, field) => {
+    const onChange = (value, field) => {
         const obj = {...property};
-        obj[field] = target.value;
+        obj[field] = value;
         setProperty(obj);
-    }
-
-    const RenderTypes = () => {
-        const options = [];
-
-        for (const type in types) {
-            options.push(
-                <option key={type} value={type}>{types[type]}</option>
-            );
-        }
-
-        return options;
     }
 
     const StatusOptions = () => {
@@ -309,7 +299,7 @@ export default function Properties() {
                             }
                         }}
                     >
-                        <Row className="align-items-end justify-content-between mb-2">
+                        <Row className="align-items-end justify-content-between mb-2 row-gap-1">
                             <Col md={2}>
                                 <Select
                                     label="Status"
@@ -329,108 +319,42 @@ export default function Properties() {
                             </Col>
                             <Col md={2}>
                                 <Filter
-                                    classes={{inputGroup: 'w-unset input-group-sm'}}
+                                    classes={{ inputGroup: 'w-unset input-group-sm' }}
                                     placeholder="Buscar"
                                 />
                             </Col>
                         </Row>
 
 
-                        <Table striped hover size="sm" className="align-middle">
+                        <Table striped hover responsive="sm" size="sm" className="align-middle">
                             <TableHeader />
-                            <TableBody labels={{noResults: 'Nenhum registro encontrado'}}/>
+                            <TableBody labels={{ noResults: 'Nenhum registro encontrado' }}/>
                         </Table>
 
                         <div className="d-flex align-items-end justify-content-end gap-3">
                             <PaginationOptions
                                 alwaysShowPagination={false}
-                                labels={{beforeSelect: 'Linhas por página'}}
-                                classes={{formControl: "form-select-sm"}}
+                                labels={{ beforeSelect: 'Linhas por página' }}
+                                classes={{ formControl: "form-select-sm" }}
                             />
                             <Pagination
                                 alwaysShowPagination={false}
-                                labels={{prevPage: '<', firstPage: 'Primeira', nextPage: '>', lastPage: 'Última'}}
-                                classes={{button: "btn-sm"}}
+                                labels={{ prevPage: '<', firstPage: 'Primeira', nextPage: '>', lastPage: 'Última'}}
+                                classes={{ button: "btn-sm" }}
                             />
                         </div>
                     </DatatableWrapper>
                 </Card.Body>
             </Card>
 
-            <Modal centered size="lg" show={modalOpen} onHide={onHide}>
-                <Modal.Header closeButton>
-                    <Modal.Title>{property.id ? 'Editar' : 'Novo'} imóvel</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Form id="form-property" onSubmit={save}>
-                        <Row className="row-gap-3">
-                            <Col md={'3'}>
-                                <Select
-                                    required
-                                    label="Tipo"
-                                    value={property.type}
-                                    onChange={e => onChange(e, 'type')}
-                                >
-                                    <RenderTypes/>
-                                </Select>
-                            </Col>
-                            <Col md={'3'}>
-                                <FormInput
-                                    required
-                                    label="Preço"
-                                    value={property.price}
-                                    onChange={e => onChange(e, 'price')}
-                                    currency
-                                />
-                            </Col>
-                            <Col md={'6'}>
-                                <FormInput
-                                    required
-                                    label="Estado"
-                                    value={property.state}
-                                    onChange={e => onChange(e, 'state')}
-                                />
-                            </Col>
-                            <Col md={'6'}>
-                                <FormInput
-                                    required
-                                    label="Cidade"
-                                    value={property.city}
-                                    onChange={e => onChange(e, 'city')}
-                                />
-                            </Col>
-                            <Col md={'6'}>
-                                <FormInput
-                                    required
-                                    label="Bairro"
-                                    value={property.district}
-                                    onChange={e => onChange(e, 'district')}
-                                />
-                            </Col>
-                            <Col md={'10'}>
-                                <FormInput
-                                    required
-                                    label="Logradouro"
-                                    value={property.street}
-                                    onChange={e => onChange(e, 'street')}
-                                />
-                            </Col>
-                            <Col md={'2'}>
-                                <FormInput
-                                    required
-                                    label="Nº"
-                                    value={property.number}
-                                    onChange={e => onChange(e, 'number')}
-                                />
-                            </Col>
-                        </Row>
-                    </Form>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Btn onClick={onHide} variant="secondary">Fechar</Btn>
-                    <Btn type="submit" form="form-property" variant="success">Salvar</Btn>
-                </Modal.Footer>
-            </Modal>
+            <PropertyModal
+                property={property}
+                types={types}
+                isOpen={modalOpen}
+                onHide={onHide}
+                onSave={save}
+                onChangeField={onChange}
+            />
         </section>
     )
 }

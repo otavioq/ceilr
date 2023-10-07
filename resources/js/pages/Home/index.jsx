@@ -56,7 +56,7 @@ export default function Home() {
     }
 
     return (
-        <Row>
+        <Row className="row-gap-1">
             <StatusReport/>
         </Row>
     )
