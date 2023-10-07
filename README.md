@@ -79,6 +79,9 @@ Com a utilização de _observers_, o controle da manipulação dos registros tam
 
 Utiliza-se, também, os _resources_, que melhoram a maneira com que os dados são retornados pelas _APIs_, podendo ser utilizados para complementar as informações de acordo com a necessidade.
 
+A aplicação conta com testes de implementação, onde cada _API_ pode ser testada para a verificação da sua integridade. Quando os testes são executados, é utilizado um banco de dados reserva,
+próprio para testes, não impactando nos registros do banco de dados principal.
+
 O _front-end_, construído utilizando o _React_, também possui sua estrutura bem dividida, contando com diretórios individuais para cada página e componente,
 fazendo uso da biblioteca _React Bootstrap_ para estilização e customização dos mesmos.<br>
 Para armazenar o estado da aplicação, é utilizado o _Redux_, que ajuda na verificação da sessão do usuário e permite recuperar as informações deste a qualquer momento dentro do código no _front-end_.<br>
