@@ -72,9 +72,11 @@ docker compose exec ceilr bash -c "php artisan test"
 # O Ceilr
 ## Ceilr, abreviado de _ceiler_, é _"aquele que faz o teto, constrói a cobertura da edificação"_.
 
-O sistema consiste em um _back-end_ feito com _PHP_, utilizando o framework _Laravel_, dividido no modelo _MVC_ e utiliza uma camada extra de abstração com os _services_,<br>
-que encapsulam toda a lógica de manipulação dos registros, tirando a responsabilidade dos _controllers_, os tornando mais manuteníveis.<br>
-Com a utilização de _observers_, o controle da manipulação dos registros também se torna mais segura durante o desenvolvimento e manutenção do código.<br>
+O sistema consiste em um _back-end_ feito com _PHP_, utilizando o framework _Laravel_, dividido no modelo _MVC_ e utiliza uma camada extra de abstração com os _services_,
+que encapsulam toda a lógica de manipulação dos registros, tirando a responsabilidade dos _controllers_, os tornando mais manuteníveis.
+
+Com a utilização de _observers_, o controle da manipulação dos registros também se torna mais seguro durante o desenvolvimento e manutenção do código.
+
 Utiliza-se, também, os _resources_, que melhoram a maneira com que os dados são retornados pelas _APIs_, podendo ser utilizados para complementar as informações de acordo com a necessidade.
 
 O _front-end_, construído utilizando o _React_, também possui sua estrutura bem dividida, contando com diretórios individuais para cada página e componente,
