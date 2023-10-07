@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\PropertyResource;
 use App\Services\PropertyService;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
  * Controlador de imóveis
@@ -60,15 +62,19 @@ class PropertiesController extends Controller
      */
     public function find(int $id): JsonResponse
     {
+        $code = 200;
         try {
             $property = $this->propertyService->find($id);
 
             $response = ['success' => true, 'data' => new PropertyResource($property)];
         } catch (ValidationException $e) {
             $response = ['success' => false, 'messages' => $e->errors()];
+        } catch (HttpException $e) {
+            $response = ['success' => false, 'messages' => [$e->getMessage()]];
+            $code = $e->getStatusCode();
         }
 
-        return response()->json($response);
+        return response()->json($response, $code);
     }
 
     /**
@@ -108,8 +114,28 @@ class PropertiesController extends Controller
      */
     public function delete(int $id): JsonResponse
     {
+        $code = 200;
         try {
             $result = $this->propertyService->delete($id);
+
+            $response = ['success' => true, 'data' => $result];
+        } catch (ValidationException $e) {
+            $response = ['success' => false, 'messages' => $e->errors()];
+        } catch (HttpException $e) {
+            $response = ['success' => false, 'messages' => [$e->getMessage()]];
+            $code = $e->getStatusCode();
+        }
+
+        return response()->json($response, $code);
+    }
+
+    /**
+     * Recupera os tipos de imóvel
+     */
+    public function getTypes(): JsonResponse
+    {
+        try {
+            $result = $this->propertyService->types();
 
             $response = ['success' => true, 'data' => $result];
         } catch (ValidationException $e) {
@@ -120,12 +146,28 @@ class PropertiesController extends Controller
     }
 
     /**
-     * Recupera os tipos de imóvel
+     * Recupera os status de imóvel
      */
-    public function getTypes(): JsonResponse
+    public function getStatuses(): JsonResponse
     {
         try {
-            $result = $this->propertyService->types();
+            $result = $this->propertyService->statuses();
+
+            $response = ['success' => true, 'data' => $result];
+        } catch (ValidationException $e) {
+            $response = ['success' => false, 'messages' => $e->errors()];
+        }
+
+        return response()->json($response);
+    }
+
+    /**
+     * Recupera os relatório de imóveis
+     */
+    public function getPropertyReport(): JsonResponse
+    {
+        try {
+            $result = $this->propertyService->report();
 
             $response = ['success' => true, 'data' => $result];
         } catch (ValidationException $e) {

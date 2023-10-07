@@ -13,6 +13,8 @@ Route::group(['middleware' => 'auth'], function() {
     Route::get('me', [AuthController::class, 'me']);
     Route::post('logout', [AuthController::class, 'logout']);
     Route::get('property-types', [PropertiesController::class, 'getTypes']);
+    Route::get('property-statuses', [PropertiesController::class, 'getStatuses']);
+    Route::get('property-report', [PropertiesController::class, 'getPropertyReport']);
 
     Route::group(['prefix' => 'properties'], function() {
         Route::post('/', [PropertiesController::class, 'create']);

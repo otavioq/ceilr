@@ -15,7 +15,8 @@ export default function RequiresAuth({Page}) {
         setFullLoader(true)
         const resp = await request({
             method: 'GET',
-            url: '/me'
+            url: '/me',
+            showError: false
         })
         setFullLoader(false)
 

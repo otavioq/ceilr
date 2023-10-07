@@ -22,6 +22,35 @@ class PropertyService extends AbstractService
     }
 
     /**
+     * Recupera os status de imóvel
+     */
+    public function statuses(): array
+    {
+        return array_filter(Property::STATUS, function($item, $key) {
+            return $key !== 'deleted';
+        }, ARRAY_FILTER_USE_BOTH);
+    }
+
+    /**
+     * Recupera os relatório de imóveis
+     */
+    public function report(): array
+    {
+        $statuses = $this->statuses();
+
+        $report = [];
+        foreach ($statuses as $status => $labels) {
+            $properties = $this->list(['status' => $status]);
+            $report[$status] = [
+                'labels' => $labels,
+                'properties' => count($properties)
+            ];
+        }
+
+        return $report;
+    }
+
+    /**
      * Lista todos os registros
      * 
      * @param array $filters Um array com filtros para a listagem* 
@@ -36,7 +65,8 @@ class PropertyService extends AbstractService
             'district' => 'nullable|string',
             'street' => 'nullable|string',
             'number' => 'nullable|string',
-            'price' => 'nullable|string'
+            'price' => 'nullable|string',
+            'status' => 'nullable|string',
         ];
         $validFilters = $this->validate($filters);
 

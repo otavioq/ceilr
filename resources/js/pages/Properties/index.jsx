@@ -3,10 +3,9 @@ import { Card, Col, Dropdown, Form, Modal, Row, Table } from "react-bootstrap";
 import request from "@/services/request";
 import Btn from "@/components/Btn";
 import FormInput from "@/components/FormInput";
-import { alert, formatCurrency, setFullLoader, unmaskCurrency } from "@/services/util";
+import { alert, formatCurrency, setFullLoader } from "@/services/util";
 import {
     DatatableWrapper,
-    EmptyTablePlaceholder,
     Filter,
     Pagination,
     PaginationOptions,
@@ -14,10 +13,12 @@ import {
     TableHeader
 } from 'react-bs-datatable';
 import Select from "@/components/Select";
+import { useSearchParams } from "react-router-dom";
 
 export default function Properties() {
 
     const ac = new AbortController
+    const ac2 = new AbortController
     const propertyData = {
         type: 'house',
         price: 0,
@@ -31,8 +32,10 @@ export default function Properties() {
     const [properties, setProperties] = useState([])
     const [modalOpen, setModalOpen] = useState(false)
     const [types, setTypes] = useState({})
-    const [paging, setPaging] = useState({})
+    const [statuses, setStatuses] = useState({})
     const [property, setProperty] = useState(propertyData)
+
+    const [searchParams, setSearchParams] = useSearchParams()
 
     useEffect(() => {
         setFullLoader(true)
@@ -40,13 +43,22 @@ export default function Properties() {
 
         return () => {
             ac.abort();
+            ac2.abort();
         }
     }, [])
+
+    useEffect(() => {
+        const status = searchParams.get('status') || ''
+
+        const filter = status?.length ? {status} : undefined
+        setFullLoader(true)
+        listProperties(filter).then(() => setFullLoader(false))
+    }, [searchParams])
 
     const getInfo = async () => {
         await Promise.all([
             getTypes(),
-            listProperties()
+            getStatuses()
         ]);
     }
 
@@ -54,10 +66,31 @@ export default function Properties() {
         const resp = await request({
             method: 'GET',
             url: '/property-types',
-            signal: ac.signal
+            signal: ac2.signal
         });
 
-        setTypes(resp);
+        setTypes(resp || {});
+    }
+
+    const getStatuses = async () => {
+        const resp = await request({
+            method: 'GET',
+            url: '/property-statuses',
+            signal: ac2.signal
+        });
+
+        setStatuses(resp || {});
+    }
+
+    const listProperties = async (filters = {}) => {
+        const query = new URLSearchParams(filters)
+        const resp = await request({
+            method: 'GET',
+            url: `/properties/?${query}`,
+            signal: ac.signal
+        })
+
+        setProperties(resp || [])
     }
 
     const renderActions = (item) => {
@@ -144,19 +177,6 @@ export default function Properties() {
         },
     ]), []);
 
-    const listProperties = async () => {
-        try {
-            const resp = await request({
-                method: 'GET',
-                url: '/properties',
-                throwError: true,
-                signal: ac.signal
-            })
-
-            setProperties(resp)
-        } catch (e) {}
-    }
-
     const updateStatus = async (id, status) => {
         const prompts = {
             'available': 'Marcar este imóvel como disponível?',
@@ -238,6 +258,22 @@ export default function Properties() {
         return options;
     }
 
+    const StatusOptions = () => {
+        const options = [];
+
+        for (const status in statuses) {
+            const label = statuses[status][0]
+            options.push(
+                <option key={status} value={status}>{label}</option>
+            );
+        }
+
+        options.unshift(
+            <option key={0} value={''}>Todos</option>
+        )
+        return options;
+    }
+
     return (
         <section>
             <Card>
@@ -271,12 +307,31 @@ export default function Properties() {
                             }
                         }}
                     >
-                        <div className="d-flex align-items-end justify-content-end mb-2">
-                            <Filter
-                                classes={{inputGroup: 'w-auto input-group-sm'}}
-                                placeholder="Buscar"
-                            />
-                        </div>
+                        <Row className="align-items-end justify-content-between mb-2">
+                            <Col md={2}>
+                                <Select
+                                    label="Status"
+                                    value={searchParams.get('status') || ''}
+                                    onChange={({target}) => setSearchParams(c => {
+                                        if (target.value?.length) {
+                                            c.set('status', target.value)
+                                        } else {
+                                            c.delete('status')
+                                        }
+                                        return c
+                                    })}
+                                    className={'form-select-sm'}
+                                >
+                                    <StatusOptions/>
+                                </Select>
+                            </Col>
+                            <Col md={2}>
+                                <Filter
+                                    classes={{inputGroup: 'w-unset input-group-sm'}}
+                                    placeholder="Buscar"
+                                />
+                            </Col>
+                        </Row>
 
 
                         <Table striped hover size="sm" className="align-middle">

@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { CanceledError } from "axios";
 import router from "@/services/router";
 import Swal from 'sweetalert2';
 
@@ -36,7 +36,6 @@ function getError(e) {
 }
 
 export default async function request(config) {
-
     const opt = {
         redirect: true,
         showError: true,
@@ -45,7 +44,7 @@ export default async function request(config) {
         headers: {},
         ...config
     }
-
+    
     try {
         const token = localStorage.getItem('auth-token')
         if (opt?.auth && !!token?.length) {
@@ -54,7 +53,7 @@ export default async function request(config) {
             opt.redirect && router.navigate('/auth/login')
             throw 'Não autorizado';
         }
-
+        
         const client = axios.create({
             baseURL: '/api',
             headers: opt.headers,
@@ -69,7 +68,10 @@ export default async function request(config) {
 
         return resp.data?.data;
     } catch (e) {
-        console.log(e);
+        if (e instanceof CanceledError) {
+            return;
+        }
+
         opt.showError && Swal.fire({
             icon: 'error',
             title: 'Erro',

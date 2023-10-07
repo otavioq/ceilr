@@ -25,10 +25,10 @@ class Property extends Model
      * Array contendo os possíveis status de um imóvel
      */
     const STATUS = [
-        self::AVAILABLE => 'Disponível',
-        self::SOLD => 'Vendido',
-        self::RENTED => 'Alugado',
-        self::DELETED => 'Deletado'
+        self::AVAILABLE => ['Disponível', 'Disponíveis'],
+        self::SOLD => ['Vendido', 'Vendidos'],
+        self::RENTED => ['Alugado', 'Alugados'],
+        self::DELETED => ['Deletado', 'Deletados']
     ];
 
     /**
@@ -71,7 +71,7 @@ class Property extends Model
      */
     public function getStatusText(): string
     {
-        return self::STATUS[$this->status];
+        return self::STATUS[$this->status][0];
     }
 
     /**
