@@ -48,11 +48,8 @@ export default function Properties() {
     }, [])
 
     useEffect(() => {
-        const status = searchParams.get('status') || ''
-
-        const filter = status?.length ? {status} : undefined
         setFullLoader(true)
-        listProperties(filter).then(() => setFullLoader(false))
+        listProperties().then(() => setFullLoader(false))
     }, [searchParams])
 
     const getInfo = async () => {
@@ -83,6 +80,11 @@ export default function Properties() {
     }
 
     const listProperties = async (filters = {}) => {
+        const status = searchParams.get('status') || ''
+        if (status.length && statuses[status]) {
+            filters.status = status
+        }
+
         const query = new URLSearchParams(filters)
         const resp = await request({
             method: 'GET',
@@ -204,7 +206,7 @@ export default function Properties() {
                     return setFullLoader(false);
                 }
 
-                await getInfo();
+                await Promise.all([getInfo(), listProperties()]);
                 setFullLoader(false);
             }
         })
@@ -230,7 +232,7 @@ export default function Properties() {
             title: `Registro ${property.id ? 'editado' : 'criado'} com sucesso`
         })
 
-        await getInfo();
+        await Promise.all([getInfo(), listProperties()]);
         onHide();
         setFullLoader(false);
     }
